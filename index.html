@@ -1162,8 +1162,13 @@ function renderCultivos(){
   if(allMO.length&&(tipo==='MANO OBRA'||!tipo)){
     const grupos={};
     allMO.forEach(r=>{
-      let act='Otra';
-      for(const a of ACTIVIDADES){if((r.desc||'').toLowerCase().includes(a.toLowerCase())){act=a;break;}}
+      const desc=(r.desc||'').toLowerCase();
+      // 1. Buscar si la descripción ES exactamente una actividad conocida
+      let act=ACTIVIDADES.find(a=>a.toLowerCase()===desc);
+      // 2. Si no, buscar si la actividad conocida está contenida en la descripción
+      if(!act) act=ACTIVIDADES.find(a=>desc.includes(a.toLowerCase()));
+      // 3. Si no hay match, usar la descripción real como nombre de grupo (no "Otra")
+      if(!act) act=r.desc||'Sin descripción';
       if(!grupos[act])grupos[act]={total:0,count:0,min:0};
       grupos[act].total+=r.monto||0;grupos[act].count++;
       const m=(r.notas||'').match(/(\d+)min/);if(m)grupos[act].min+=parseInt(m[1]);
